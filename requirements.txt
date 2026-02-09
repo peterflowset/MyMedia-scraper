@@ -1,0 +1,11 @@
+outscraper
+gspread
+google-auth
+requests
+beautifulsoup4
+playwright
+python-dotenv
+pydantic
+streamlit
+tenacity
+openai

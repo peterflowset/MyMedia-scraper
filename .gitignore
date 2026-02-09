@@ -1,0 +1,10 @@
+.env
+credentials/
+__pycache__/
+.venv/
+*.pyc
+.streamlit/
+cache.db
+debug/
+.DS_Store
+.claude/
