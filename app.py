@@ -24,7 +24,6 @@ logger = logging.getLogger(__name__)
 
 st.set_page_config(page_title="MyMedia Lead Scraper", page_icon="📋", layout="centered")
 st.title("MyMedia Lead Scraper")
-st.markdown("Automatisierte Lead-Generierung via Google Maps + Website-Scraping")
 
 # --- Config check ---
 try:
@@ -43,11 +42,6 @@ with st.form("scrape_form"):
     with col2:
         city = st.text_input("Stadt", value="Bozen", help="z.B. Bozen, München, Wien")
         num_leads = st.number_input("Anzahl Leads", min_value=1, max_value=100, value=20)
-    debug_contacts = st.checkbox(
-        "Debug: Kontakt-Scrape protokollieren",
-        value=False,
-        help="Speichert URLs, Seiteninhalte und LLM-Antworten pro Firma in ./debug/",
-    )
 
     submitted = st.form_submit_button("Scrapen starten", type="primary", use_container_width=True)
 
@@ -106,7 +100,7 @@ def _enrich_worker(args: tuple[int, "Business"]) -> tuple[int, "Business"]:
         return idx, cached
     enricher = enrichers[idx % MAX_WORKERS]
     try:
-        result = enricher.enrich_business(biz, debug=debug_contacts)
+        result = enricher.enrich_business(biz)
         set_cached_enrichment(result)
         return idx, result
     except Exception as e:
