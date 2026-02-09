@@ -3,7 +3,6 @@ from __future__ import annotations
 import json
 import logging
 import re
-import time
 
 from openai import OpenAI
 
@@ -94,9 +93,6 @@ class ContactEnricher:
             )
         else:
             logger.info(f"'{business.name}': Keine Kontaktpersonen gefunden")
-
-        # Rate limiting
-        time.sleep(1.5)
 
         return business
 
