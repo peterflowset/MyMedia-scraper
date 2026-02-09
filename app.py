@@ -1,6 +1,7 @@
 import logging
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from datetime import datetime
 
 import streamlit as st
 
@@ -12,10 +13,7 @@ from cache import (
 )
 from config import Config
 from enrichment.contact_enricher import ContactEnricher
-import csv
-import io
-
-from export.google_sheets import GoogleSheetsExporter, HEADERS
+from export.csv_export import build_csv
 from scrapers.outscraper_client import OutscraperService
 
 logging.basicConfig(
@@ -130,38 +128,8 @@ for e in enrichers:
 
 businesses = enriched
 total_contacts = sum(len(b.contact_persons) for b in businesses)
-progress.progress(80, text="Enrichment abgeschlossen")
-status_enrich.success(f"✅ {total_contacts} Ansprechpartner gefunden")
-
-# Stage 3: Google Sheets Export
-status_export = st.empty()
-status_export.info("📊 Exportiere nach Google Sheets...")
-progress.progress(85, text="Google Sheets Export...")
-
-sheet_url = None
-try:
-    if "gcp_service_account" in st.secrets:
-        exporter = GoogleSheetsExporter(service_account_info=dict(st.secrets["gcp_service_account"]))
-    else:
-        exporter = GoogleSheetsExporter(service_account_file=config.google_service_account_file)
-    folder_id = config.google_drive_folder_id or None
-    sheet_url = exporter.export(businesses, business_type, city, folder_id=folder_id)
-    status_export.success("✅ Export abgeschlossen")
-except Exception as e:
-    logger.exception("Google Sheets Export-Fehler")
-    status_export.warning(f"Google Sheets Export fehlgeschlagen: {e}")
-
 progress.progress(100, text="Fertig!")
-
-# --- CSV Fallback ---
-def _build_csv(businesses):
-    buf = io.StringIO()
-    writer = csv.writer(buf)
-    writer.writerow(HEADERS)
-    for biz in businesses:
-        row = GoogleSheetsExporter._business_to_row(None, biz)
-        writer.writerow(row)
-    return buf.getvalue()
+status_enrich.success(f"✅ {total_contacts} Ansprechpartner gefunden")
 
 # --- Result ---
 st.divider()
@@ -169,14 +137,11 @@ st.subheader("Ergebnis")
 st.metric("Firmen", len(businesses))
 st.metric("Ansprechpartner", total_contacts)
 
-if sheet_url:
-    st.markdown(f"**[Google Sheet öffnen]({sheet_url})**")
-
-date_str = __import__("datetime").datetime.now().strftime("%Y-%m-%d")
+date_str = datetime.now().strftime("%Y-%m-%d")
 csv_filename = f"Leads_{business_type}_{city}_{date_str}.csv"
 st.download_button(
     label="CSV herunterladen",
-    data=_build_csv(businesses),
+    data=build_csv(businesses),
     file_name=csv_filename,
     mime="text/csv",
 )
