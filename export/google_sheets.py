@@ -74,7 +74,8 @@ class GoogleSheetsExporter:
         logger.info(f"Export abgeschlossen: {sheet_url}")
         return sheet_url
 
-    def _business_to_row(self, biz: Business) -> list[str]:
+    @staticmethod
+    def _business_to_row(biz: Business) -> list[str]:
         company_email = ", ".join(biz.company_emails) if biz.company_emails else ""
         company_phone = _strip_leading_plus(biz.phone)
 
