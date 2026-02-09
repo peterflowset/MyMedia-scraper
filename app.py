@@ -1,4 +1,5 @@
 import logging
+import os
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
@@ -25,6 +26,20 @@ logger = logging.getLogger(__name__)
 
 st.set_page_config(page_title="MyMedia Lead Scraper", page_icon="📋", layout="centered")
 st.title("MyMedia Lead Scraper")
+
+# --- Password check ---
+app_password = os.environ.get("APP_PASSWORD") or st.secrets.get("APP_PASSWORD", "")
+if app_password:
+    if "authenticated" not in st.session_state:
+        st.session_state.authenticated = False
+    if not st.session_state.authenticated:
+        pwd = st.text_input("Passwort", type="password")
+        if pwd and pwd == app_password:
+            st.session_state.authenticated = True
+            st.rerun()
+        elif pwd:
+            st.error("Falsches Passwort")
+        st.stop()
 
 # --- Config check ---
 try:
