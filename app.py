@@ -140,7 +140,8 @@ try:
         exporter = GoogleSheetsExporter(service_account_info=dict(st.secrets["gcp_service_account"]))
     else:
         exporter = GoogleSheetsExporter(service_account_file=config.google_service_account_file)
-    sheet_url = exporter.export(businesses, business_type, city)
+    folder_id = config.google_drive_folder_id or None
+    sheet_url = exporter.export(businesses, business_type, city, folder_id=folder_id)
 except Exception as e:
     st.error(f"Google Sheets Export-Fehler: {e}")
     logger.exception("Export-Fehler")

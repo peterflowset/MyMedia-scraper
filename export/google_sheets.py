@@ -42,14 +42,15 @@ class GoogleSheetsExporter:
             self.gc = gspread.service_account(filename=service_account_file)
 
     def export(
-        self, businesses: list[Business], business_type: str, city: str
+        self, businesses: list[Business], business_type: str, city: str,
+        folder_id: str | None = None,
     ) -> str:
         """Export businesses to a new Google Sheet. Returns the sheet URL."""
         date_str = datetime.now().strftime("%Y-%m-%d")
         title = f"Leads_{business_type}_{city}_{date_str}"
 
         logger.info(f"Erstelle Google Sheet: '{title}'")
-        spreadsheet = self.gc.create(title)
+        spreadsheet = self.gc.create(title, folder_id=folder_id)
         spreadsheet.share('', perm_type='anyone', role='reader')
 
         worksheet = spreadsheet.sheet1
